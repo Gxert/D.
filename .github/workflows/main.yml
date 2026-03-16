@@ -1,0 +1,43 @@
+name: Сборка EXE на Windows
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest  # Важно! Используем Windows
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Установка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Установка зависимостей
+        run: |
+          pip install ursina
+          pip install pyinstaller
+          pip install --upgrade setuptools
+      
+      - name: Сборка EXE
+        run: |
+          pyinstaller --onefile --windowed 
+            --collect-data ursina 
+            --hidden-import ursina 
+            --hidden-import socket 
+            --hidden-import threading 
+            --hidden-import json 
+            --name "МояИгра" `
+            D.py
+      
+      - name: Проверка результата
+        run: |
+          dir dist
+          echo "✅ Если видишь МояИгра.exe - всё ок!"
+      
+      - name: Загрузка EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: МояИгра-EXE
+          path: dist/*.exe
